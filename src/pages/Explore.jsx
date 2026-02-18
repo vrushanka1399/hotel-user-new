@@ -1,15 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
 export default function Explore() {
   const [list, setList] = useState([]);
 
-  useEffect(() => {
-    load();
-  }, []);
-
-  const load = async () => {
+  const load = useCallback(async () => {
     const res = await axios.get(
       "https://firestore.googleapis.com/v1/projects/ecompract/databases/(default)/documents/listings"
     );
@@ -24,7 +20,6 @@ export default function Explore() {
 
       return {
         id: d.name.split("/").pop(),
-
         name: f.name?.stringValue || "",
         price: f.price?.integerValue || "",
         city: f.city?.stringValue || "",
@@ -33,7 +28,11 @@ export default function Explore() {
     });
 
     setList(arr);
-  };
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
     <div className="grid">

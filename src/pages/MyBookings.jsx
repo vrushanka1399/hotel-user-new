@@ -1,53 +1,64 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 
 export default function MyBookings() {
   const [list, setList] = useState([]);
   const email = localStorage.getItem("user");
 
+  // ✅ Wrapped in useCallback to fix dependency warning
+  const load = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        "https://firestore.googleapis.com/v1/projects/ecompract/databases/(default)/documents/bookings"
+      );
+
+      if (!res.data.documents) {
+        setList([]);
+        return;
+      }
+
+      const arr = res.data.documents.map((d) => {
+        const f = d.fields || {};
+
+        return {
+          id: d.name.split("/").pop(),
+          hotel: f.hotel?.stringValue || "",
+          price: Number(f.price?.integerValue || f.price?.stringValue || 0),
+          image: f.image?.stringValue || "",
+          guests: Number(f.guests?.integerValue || 0),
+          checkIn: f.checkIn?.stringValue || "",
+          checkOut: f.checkOut?.stringValue || "",
+          email: f.email?.stringValue || "",
+          status: f.status?.stringValue || "Pending",
+        };
+      });
+
+      // ONLY CURRENT USER
+      setList(arr.filter((b) => b.email === email));
+    } catch (error) {
+      console.error("Error loading bookings:", error);
+      setList([]);
+    }
+  }, [email]);
+
+  // ✅ Proper dependency
   useEffect(() => {
     load();
   }, [load]);
 
-  const load = async () => {
-    const res = await axios.get(
-      "https://firestore.googleapis.com/v1/projects/ecompract/databases/(default)/documents/bookings"
-    );
-
-    if (!res.data.documents) {
-      setList([]);
-      return;
-    }
-
-    const arr = res.data.documents.map((d) => {
-      const f = d.fields || {};
-
-      return {
-        id: d.name.split("/").pop(),
-        hotel: f.hotel?.stringValue || "",
-        price: Number(f.price?.integerValue || f.price?.stringValue || 0),
-        image: f.image?.stringValue || "",
-        guests: Number(f.guests?.integerValue || 0),
-        checkIn: f.checkIn?.stringValue || "",
-        checkOut: f.checkOut?.stringValue || "",
-        email: f.email?.stringValue || "",
-        status: f.status?.stringValue || "Pending",
-      };
-    });
-
-    // ONLY CURRENT USER
-    setList(arr.filter((b) => b.email === email));
-  };
-
   const deleteBooking = async (id) => {
-    await axios.delete(
-      `https://firestore.googleapis.com/v1/projects/ecompract/databases/(default)/documents/bookings/${id}`
-    );
+    try {
+      await axios.delete(
+        `https://firestore.googleapis.com/v1/projects/ecompract/databases/(default)/documents/bookings/${id}`
+      );
 
-    load();
+      load();
+    } catch (error) {
+      console.error("Delete failed:", error);
+    }
   };
 
-  // nights calculation
+  // nights calculation (UNCHANGED LOGIC)
   const nights = (a, b) =>
     Math.max(
       1,
@@ -66,7 +77,7 @@ export default function MyBookings() {
       <div className="grid">
         {list.map((b) => (
           <div className="card" key={b.id}>
-            {b.image && <img src={b.image} width="100%" alt="" />}
+            {b.image && <img src={b.image} width="100%" alt={b.hotel} />}
 
             <h3>{b.hotel}</h3>
 
