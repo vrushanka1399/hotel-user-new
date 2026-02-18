@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
@@ -13,8 +13,8 @@ export default function Details() {
   const email = localStorage.getItem("user");
 
   useEffect(() => {
-    loadHotel();
-  }, []);
+   loadHotel();
+}, [loadHotel]);
 
   const loadHotel = async () => {
     const res = await axios.get(

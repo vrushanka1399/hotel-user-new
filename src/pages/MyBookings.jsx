@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function MyBookings() {
@@ -7,7 +7,7 @@ export default function MyBookings() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   const load = async () => {
     const res = await axios.get(
