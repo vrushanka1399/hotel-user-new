@@ -11,7 +11,7 @@ export default function Details() {
   const [checkOut, setCheckOut] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const email = localStorage.getItem("user");
+ 
 
   const loadHotel = useCallback(async () => {
     try {
@@ -42,6 +42,12 @@ export default function Details() {
   }, [loadHotel]);
 
   const bookNow = async () => {
+     const email = localStorage.getItem("user");
+
+     if(!email){
+      alert("Please login first");
+      return;
+     }
     if (!guests || !checkIn || !checkOut) {
       alert("Fill all fields");
       return;
