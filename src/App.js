@@ -1,25 +1,36 @@
-import logo from './logo.svg';
-import './App.css';
+import {BrowserRouter,Routes,Route,Link} from "react-router-dom";
+import Auth from "./pages/Auth";
+import Home from "./pages/Home";
+import Explore from "./pages/Explore";
+import Details from "./pages/Details";
+import MyBookings from "./pages/MyBookings";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+export default function App(){
+
+ const logout=()=>{
+  localStorage.removeItem("user");
+  window.location.href="/auth";
+ };
+
+ return(
+  <BrowserRouter>
+
+   <nav>
+    <Link to="/">Home</Link> {"  "}
+    <Link to="/explore">Explore</Link> {"  "}
+    <Link to="/bookings">My Bookings</Link>{"  "}
+    <button onClick={logout}>Logout</button>
+   </nav>
+
+   <Routes>
+    <Route path="/auth" element={<Auth/>}/>
+    <Route path="/" element={<Home/>}/>
+    <Route path="/explore" element={<Explore />} />
+    <Route path="/explore/:id" element={<Details />} />
+    <Route path="/details/:id" element={<Details/>}/>
+    <Route path="/bookings" element={<MyBookings/>}/>
+   </Routes>
+
+  </BrowserRouter>
+ );
 }
-
-export default App;
