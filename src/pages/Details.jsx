@@ -13,18 +13,17 @@ export default function Details() {
 
   const email = localStorage.getItem("user");
 
-  // ✅ Wrapped in useCallback to avoid ESLint error
   const loadHotel = useCallback(async () => {
     try {
       const res = await axios.get(
         `https://firestore.googleapis.com/v1/projects/ecompract/databases/(default)/documents/listings/${id}`
       );
 
-      const f = res.data.fields;
+      const f = res.data.fields || {};
 
       setHotel({
         name: f.name?.stringValue || "",
-        price: f.price?.integerValue || 0,
+        price: Number(f.price?.integerValue || 0),
         city: f.city?.stringValue || "",
         address: f.address?.stringValue || "",
         pincode: f.pincode?.stringValue || "",
@@ -38,7 +37,6 @@ export default function Details() {
     }
   }, [id]);
 
-  // ✅ Proper dependency
   useEffect(() => {
     loadHotel();
   }, [loadHotel]);
@@ -54,23 +52,23 @@ export default function Details() {
         "https://firestore.googleapis.com/v1/projects/ecompract/databases/(default)/documents/bookings",
         {
           fields: {
-            hotel: { stringValue: hotel.name },
-            image: { stringValue: hotel.image },
-            city: { stringValue: hotel.city },
-            guests: { integerValue: guests },
-            checkIn: { stringValue: checkIn },
-            checkOut: { stringValue: checkOut },
-            email: { stringValue: email },
+            hotel: { stringValue: hotel.name || "" },
+            image: { stringValue: hotel.image || "" },
+            city: { stringValue: hotel.city || "" },
+            guests: { integerValue: String(Number(guests)) },
+            checkIn: { stringValue: checkIn || "" },
+            checkOut: { stringValue: checkOut || "" },
+            email: { stringValue: email || "" },
             status: { stringValue: "Pending" },
-            price: { integerValue: hotel.price },
+            price: { integerValue: String(Number(hotel.price || 0)) },
           },
         }
       );
 
       alert("Booking sent for approval");
     } catch (error) {
-      console.error("Booking error:", error);
-      alert("Something went wrong");
+      console.error("Booking error:", error.response?.data || error);
+      alert("Something went wrong while booking.");
     }
   };
 
